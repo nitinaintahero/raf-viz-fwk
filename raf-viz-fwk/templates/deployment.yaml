@@ -1,0 +1,118 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    service: raf-viz-fwk
+  name: raf-viz-fwk
+  namespace: {{ .Values.viz_fwk_kube_namespace }}
+spec:
+  replicas: 1
+  strategy:
+   type: Recreate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        service: raf-viz-fwk
+    spec:
+      containers:
+      - args:
+        - tail
+        - -f
+        - /dev/null
+        env:
+        - name: POSTGRES_DB
+          value: {{ .Values.viz_fwk_postgresql_db_name }}
+        - name: POSTGRES_HOST
+          value: "{{ .Values.viz_fwk_postgresql_login_host }}"
+        - name: POSTGRES_PORT
+          value: "{{ .Values.viz_fwk_postgresql_login_port }}"
+        - name: POSTGRES_USER
+          value: "{{ .Values.viz_fwk_postgresql_login_user }}"
+        - name: POSTGRES_PASSWORD
+          value: "{{ .Values.viz_fwk_postgresql_login_password }}"
+        - name: REDIS_HOST
+          value: redis
+        - name: REDIS_PORT
+          value: "6379"
+        - name: SUPERSET_ENV
+          value: local
+        - name: IS_KERBEROS_ENABLED
+          value: "{{ .Values.viz_fwk_kerberos_enabled }}"
+        - name: AUTH_TYPE
+          value: "{{ .Values.viz_fwk_auth_type }}"
+        - name: AUTH_ROLE_ADMIN
+          value: "{{ .Values.viz_fwk_auth_role_admin }}"
+        - name: AUTH_USER_REGISTRATION_ROLE
+          value: "{{ .Values.viz_fwk_auth_user_registration_role }}"
+        - name: AUTH_ADMIN_USER_LIST
+          value: "{{ .Values.viz_fwk_admin_user_list }}"
+        - name: APP_NAME
+          value: "{{ .Values.viz_fwk_app_name }}"
+        - name: HELP_ENABLED
+          value: "{{ .Values.viz_fwk_help_enabled }}"
+        - name: SESSION_LIFETIME_SECONDS
+          value: "{{ .Values.viz_fwk_session_lifetime_seconds }}"
+        - name: LOG_LEVEL
+          value: "{{ .Values.viz_fwk_log_level }}"
+        - name: CACHE_DEFAULT_TIMEOUT
+          value: "{{ .Values.viz_fwk_cache_default_timeout }}"
+        - name: CACHE_TYPE
+          value: "{{ .Values.viz_fwk_cache_type }}"
+        - name: APPLICATION_PREFIX
+          value: "{{ .Values.viz_fwk_application_prefix }}"
+        - name: IS_KNOX_SSO_ENABLED
+          value: "false"
+        - name: KNOX_SSO_PUBLIC_KEY
+        - name: KNOX_SSO_URL
+        - name: KNOX_SSO_COOKIE_NAME
+          value: hadoop-jwt
+        - name: KNOX_SSO_ORIGINALURL
+          value: originalUrl
+        - name: WTF_CSRF_EXEMPT_STR
+        - name: ENABLE_CHUNK_ENCODING
+          value: "{{ .Values.viz_fwk_enable_chunk_encoding }}"
+        - name: ENABLE_CORS
+          value: "{{ .Values.viz_fwk_enable_cors }}"
+        - name: CORS_OPTIONS
+          value: "{{ .Values.viz_fwk_cors_options }}"
+        - name: HIVE_KEYTAB_NAME
+          value: "{{ .Values.viz_fwk_hive_keytab_name }}"
+        - name: WALKME_ENABLED
+          value: "{{ .Values.viz_fwk_walkme_enabled }}"
+        - name: GUNICORN_PROCESSORS
+          value: "{{ .Values.viz_fwk_nprocessors }}"
+        - name: GUNICORN_WORKER_TIMEOUT
+          value: "{{ .Values.viz_fwk_server_worker_timeout }}"
+        - name: GUNICORN_WORKER_KEEP_ALIVE
+          value: "{{ .Values.viz_fwk_server_worker_keep_alive }}"
+        - name: CONTAINER_PORT
+          value: "{{ .Values.viz_fwk_container_port }}"
+        - name: TICKET_GENERATION_SYSTEM_NAME
+          value: "{{ .Values.viz_fwk_ticket_generation_system_name }}"
+        image: "{{ .Values.viz_fwk_docker_registory_url }}/{{ .Values.viz_fwk_docker_image_name }}:{{ .Values.viz_fwk_image_tag }}"
+        imagePullPolicy: IfNotPresent
+        name: raf-viz-fwk
+        ports:
+        - containerPort: {{ .Values.viz_fwk_container_port }}
+          hostPort: {{ .Values.viz_fwk_host_port }}
+        resources: {}
+        volumeMounts:
+        - name: secret-krb5-keytab-volume
+          readOnly: true
+          mountPath: /etc/security/keytabs
+        - name: secret-krb5-config-volume
+          readOnly: true
+          mountPath: {{ .Values.viz_fwk_krb5_conf_path }}
+          subPath: {{ .Values.viz_fwk_krb5_conf_name }}
+      volumes:
+      - name: secret-krb5-keytab-volume
+        secret:
+         secretName: {{ .Values.viz_fwk_hive_keytab_secret_name }}
+         items:
+         - key: {{ .Values.viz_fwk_hive_keytab_name }}
+           path: {{ .Values.viz_fwk_hive_keytab_name }}
+      - name: secret-krb5-config-volume
+        secret:
+         secretName: {{ .Values.viz_fwk_krb5_conf_secret_name }}

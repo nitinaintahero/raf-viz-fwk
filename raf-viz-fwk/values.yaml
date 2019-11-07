@@ -1,0 +1,151 @@
+# defaults file for raf-viz-fwk
+
+# ------------------------------------------------------------------ #
+#			Disclaimer				     #
+# ------------------------------------------------------------------ #
+
+viz_fwk_docker_registory_url: "artifacts.ggn.in.guavus.com:4244"
+viz_fwk_nodes: "{{ groups[viz_fwk_group_name] }}"
+viz_fwk_knox_gateway_host: "{{ site_hdp_knox_gateway[0] | default() }}"
+viz_fwk_floating_ip: "{{ site_haproxy_vip_fqdn | default() }}"
+viz_fwk_hive_server: "{{ site_hdp_hive_server | default([]) }}"
+viz_fwk_postgresql_nodes: ['localhost']
+viz_fwk_installation_mode: "{{ raf_installation_mode | default('install')}}"
+# ------------------------------------------------------------------#
+#                       Docker Images                               #
+# ------------------------------------------------------------------#
+
+viz_fwk_docker_image_name: "guavus-superset"
+viz_fwk_image_tag: "3.7.2-guavus03"
+
+viz_fwk_kube_namespace: "guavus-raf"
+
+# ------------------------------------------------------------------#
+#                       Configurations                              #
+# ------------------------------------------------------------------#
+
+viz_fwk_config_files:
+    - name: raf-viz-fwk-deployment
+      file: raf-viz-fwk-deployment.yaml
+      type: Deployment
+      meta_data_name: raf-viz-fwk
+    - name: raf-viz-fwk-service
+      file: raf-viz-fwk-service.yaml
+      type: Service
+      meta_data_name: raf-viz-fwk
+
+viz_fwk_postgresql_login_host: "192.168.135.82"
+viz_fwk_postgresql_login_user: "postgres"
+viz_fwk_postgresql_login_password: "admin123"
+viz_fwk_postgresql_login_port: "5432"
+viz_fwk_postgresql_schema_name: rvf
+viz_fwk_postgresql_db_user: rvf
+viz_fwk_postgresql_db_password: rvf
+viz_fwk_postgresql_db_name: rvf
+
+viz_fwk_enable_cors: "True"
+viz_fwk_cors_options: "{}"
+viz_fwk_walkme_enabled: "False"
+viz_fwk_wtf_csrf_exempt_str: ""
+viz_fwk_enable_chunk_encoding: "True"
+# Gunicorn configration
+viz_fwk_nprocessors: 1
+viz_fwk_server_worker_timeout: 300   # in secs
+viz_fwk_server_worker_keep_alive: 300 # in secs
+
+# Ports configration
+viz_fwk_container_port: 8088
+viz_fwk_host_port: "8888"
+viz_fwk_service_port: "32443"
+
+# ------------------------------------------------------------------#
+#                       Kerberos Config                             #
+# ------------------------------------------------------------------#
+viz_fwk_hive_keytab_name: "hive.service.keytab"
+viz_fwk_hive_keytab_path: "/etc/security/keytabs/{{ viz_fwk_hive_keytab_name }}"
+viz_fwk_krb5_conf_name: "krb5.conf"
+viz_fwk_krb5_conf_path: "/etc/{{ viz_fwk_krb5_conf_name }}"
+viz_fwk_hive_keytab_secret_name: "krb5-hive-keytab-secret"
+viz_fwk_krb5_conf_secret_name: "krb5-config-secret"
+
+viz_fwk_keytab_config_files:
+    - name: "{{ viz_fwk_hive_keytab_name }}"
+      path: "{{ viz_fwk_hive_keytab_path }}"
+      secret_name: "{{ viz_fwk_hive_keytab_secret_name }}"
+    - name: "{{ viz_fwk_krb5_conf_name }}"
+      path: "{{ viz_fwk_krb5_conf_path }}"
+      secret_name: "{{ viz_fwk_krb5_conf_secret_name }}"
+
+viz_fwk_kerberos_enabled: "{{ raf_kerberos_enabled | default(true) }}"
+# Config Diretory
+viz_fwk_application_prefix: "/gateway/{{ raf_knox_topology_name }}/rvf"
+
+# Jira ticket configuration
+viz_fwk_ticket_generation_system_name: "'JIRA'"
+viz_fwk_ticket_generation_system_endpoint: "{{ raf_ticket_generation_system_endpoint | default('') }}"
+viz_fwk_ticket_generation_system_api_key: "{{ raf_ticket_generation_system_api_key | default('') }}"
+viz_fwk_ticket_generation_system_user: "{{ raf_ticket_generation_system_user | default('') }}"
+
+# Knox configuration
+viz_fwk_is_knox_sso_enabled: "False"
+viz_fwk_knox_sso_url: "{{ site_hdp_knox_ambari_sso_provider_url | default() }}"
+viz_fwk_knox_sso_cookie_name: "{{ hdp_knox_ambari_sso_jwt_cookieName | default('hadoop-jwt') }}"
+viz_fwk_knox_sso_originalurl: "{{ hdp_knox_ambari_sso_provider_originalUrlParamName | default('originalUrl') }}"
+
+# LDAP configuration
+viz_fwk_certificate_files: []
+viz_fwk_admin_user_list: "{{ raf_ldap_user }}"   # comma separated userID list
+
+viz_fwk_auth_role_admin: "Admin"
+viz_fwk_auth_role_public: "Public"
+
+viz_fwk_auth_type: "AUTH_DB"
+viz_fwk_auth_user_registration: "True"
+viz_fwk_auth_user_registration_role: "Dashboard_Viewer"
+viz_fwk_auth_ldap_use_tls: "False"
+viz_fwk_auth_ldap_server: ""    # ldap://guavus.com:389 (Define the DN for the user that will be used for the initial LDAP BIND. This is necessary for OpenLDAP and can be used on MSFT AD.)
+
+# certificate related configration
+viz_fwk_auth_ldap_tls_demand: "False"
+viz_fwk_auth_ldap_tls_cacertdir: "/etc/cert/"
+viz_fwk_auth_ldap_tls_cacertfile: ""
+viz_fwk_auth_ldap_tls_certfile: ""
+viz_fwk_auth_ldap_tls_keyfile: ""
+
+# ldap configration
+viz_fwk_auth_ldap_search: ""    # dc=guavus,dc=com
+viz_fwk_auth_ldap_uid_field: "uid"    # sAMAccountName
+viz_fwk_auth_ldap_firstname_field: "givenName"
+viz_fwk_auth_ldap_lastname_field: "sn"
+viz_fwk_auth_ldap_email_field: "mail"
+viz_fwk_auth_ldap_allow_self_signed: "False"
+viz_fwk_auth_ldap_append_domain: ""
+viz_fwk_auth_ldap_username_format: ""
+viz_fwk_auth_ldap_search_filter: ""
+
+# Application configuration
+viz_fwk_app_name: "Dashboard Builder"
+viz_fwk_help_enabled: "False"
+viz_fwk_session_lifetime_seconds: "3600"      # stale session timeout
+viz_fwk_log_level: "INFO"
+viz_fwk_cache_default_timeout: "86400"
+viz_fwk_cache_type: "null"
+
+# ---- HAPROXY CONFIG ---#
+viz_fwk_haproxy_node: "{{ site_haproxy_host | default([]) }}"
+
+viz_fwk_haproxy_config:
+    - haproxy_proxy_name: RAF_VIZ_FWK_SERVER
+      haproxy_proxy_type: listen
+      haproxy_proxy_config: |
+        bind :{{ viz_fwk_host_port }}
+        mode http
+        balance roundrobin
+        {% for host in viz_fwk_nodes  %}server {{ hostvars[host]['ansible_fqdn'] }} {{ hostvars[host]['ansible_default_ipv4']['address'] }}:{{ viz_fwk_host_port }}
+        {%- if loop.first %} check
+        {% else %} check backup
+        {% endif -%}
+        {% endfor %}
+      haproxy_proxy_config_mark: raf_viz_fwk_proxy
+
+viz_fwk_use_haproxy: "{{ viz_fwk_haproxy_node | length > 0 }}"

@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    service: raf-viz-fwk
+  name: raf-viz-fwk
+  namespace: {{ .Values.viz_fwk_kube_namespace }}
+spec:
+  ports:
+  - name: "raf-viz-fwk-service"
+    protocol: TCP
+    port: {{ .Values.viz_fwk_service_port }}
+    targetPort: {{ .Values.viz_fwk_container_port }}
+    nodePort: {{ .Values.viz_fwk_service_port }}
+  selector:
+    service: raf-viz-fwk
+  type: NodePort  
+status:
+  loadBalancer: {}
